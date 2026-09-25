@@ -1,0 +1,177 @@
+{#
+ # _utility.twig
+ # --------------------
+ #
+ # Find & Resave utility page: the search form, the results table with
+ # per-element checkboxes, and the replace/resave actions.
+ #}
+
+{% import '_includes/forms' as forms %}
+
+{% set utilityUrl = cpUrl('utilities/' ~ utilityId) %}
+
+{# Last run summary #}
+{% if lastRun %}
+    <div class="readable" style="margin-bottom: 24px;">
+        <p class="light">
+            {{ 'Last run {date}:'|t('find-replace', { date: lastRun.date|datetime('short') }) }}
+            {% if lastRun.replace is null %}
+                {{ 'resaved elements containing “{find}”.'|t('find-replace', { find: lastRun.find }) }}
+            {% else %}
+                {{ 'replaced “{find}” with “{replace}”.'|t('find-replace', { find: lastRun.find, replace: lastRun.replace }) }}
+            {% endif %}
+            {{ '{saved} saved, {unchanged} unchanged, {failed} failed.'|t('find-replace', {
+                saved: lastRun.saved,
+                unchanged: lastRun.unchanged,
+                failed: lastRun.failedCount,
+            }) }}
+        </p>
+        {% if lastRun.failed|length %}
+            <ul class="bullets">
+                {% for failure in lastRun.failed %}
+                    <li><strong>{{ failure.label }}</strong> ({{ failure.target }}): {{ failure.error }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+    <hr>
+{% endif %}
+
+{# Search #}
+<form method="get" action="{{ utilityUrl }}" accept-charset="UTF-8">
+    {{ forms.textField({
+        label: 'Find'|t('find-replace'),
+        instructions: 'Searches titles and every field’s stored content, on all element types and sites. Matching is exact and case-sensitive. Relation fields (Entries, Assets, etc.) can’t be searched.'|t('find-replace'),
+        id: 'find',
+        name: 'find',
+        value: find,
+        required: true,
+        autofocus: find is empty,
+    }) }}
+
+    {{ forms.lightswitchField({
+        label: 'Include drafts'|t('find-replace'),
+        id: 'drafts',
+        name: 'drafts',
+        on: includeDrafts,
+    }) }}
+
+    <button type="submit" class="btn">{{ 'Search'|t('find-replace') }}</button>
+</form>
+
+{# Results #}
+{% if search is not null %}
+    <hr>
+
+    {% if search.results is empty %}
+        <p>{{ 'No elements contain “{find}”.'|t('find-replace', { find: find }) }}</p>
+    {% else %}
+        <p>
+            {{ '{count, plural, =1{1 element contains} other{# elements contain}} “{find}”.'|t('find-replace', {
+                count: search.results|length,
+                find: find,
+            }) }}
+            {% if search.truncated %}
+                <strong>{{ 'Only the first {limit} are shown. Run the replace, then search again for the rest.'|t('find-replace', { limit: limit }) }}</strong>
+            {% endif %}
+        </p>
+
+        <form id="find-resave-form" method="post" accept-charset="UTF-8">
+            {{ actionInput('find-replace/default/run') }}
+            {{ csrfInput() }}
+            {{ hiddenInput('find', find) }}
+            {% if includeDrafts %}{{ hiddenInput('drafts', 1) }}{% endif %}
+
+            <div class="tablepane" style="margin-bottom: 24px;">
+                <table class="data fullwidth">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-cell" scope="col">
+                                <input type="checkbox" id="find-resave-all" class="checkbox" checked aria-label="{{ 'Select all'|t('find-replace') }}">
+                                <label for="find-resave-all"></label>
+                            </th>
+                            <th scope="col">{{ 'Element'|t('find-replace') }}</th>
+                            <th scope="col">{{ 'Matches'|t('find-replace') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in search.results %}
+                            {% set checkboxId = 'find-resave-' ~ result.key|replace(':', '-') %}
+                            <tr>
+                                <td class="checkbox-cell">
+                                    <input type="checkbox" id="{{ checkboxId }}" class="checkbox" name="targets[]" value="{{ result.key }}" checked>
+                                    <label for="{{ checkboxId }}"></label>
+                                </td>
+                                <td>
+                                    {% if result.cpEditUrl %}
+                                        <a href="{{ result.cpEditUrl }}" target="_blank">{{ result.label }}</a>
+                                    {% else %}
+                                        {{ result.label }}
+                                    {% endif %}
+                                    <div class="light smalltext">
+                                        {{ result.typeName }}
+                                        {%- if result.ownerLabel %} · {{ 'in {owner}'|t('find-replace', { owner: result.ownerLabel }) }}{% endif %}
+                                        {%- if result.isDraft %} · {{ 'Draft'|t('app') }}{% endif %}
+                                        {%- if craft.app.isMultiSite %} · {{ result.site }}{% endif %}
+                                        · #{{ result.id }}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% for field in result.fields %}
+                                        <div style="margin-bottom: 8px;">
+                                            <strong>{{ field.name }}</strong>
+                                            {% if field.handle %}<code class="light smalltext">{{ field.handle }}</code>{% endif %}
+                                            {% for snippet in field.snippets %}
+                                                <div class="smalltext code" style="word-break: break-word;">{{ snippet|raw }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {{ forms.textField({
+                label: 'Replace with'|t('find-replace'),
+                instructions: 'Leave blank to remove the text. Replacing saves each selected element and creates an entry revision you can revert.'|t('find-replace'),
+                id: 'replace',
+                name: 'replace',
+                value: replace,
+            }) }}
+
+            <p class="warning with-icon">{{ 'Back up your database before replacing. Each element is saved through Craft, and the changes run in the queue.'|t('find-replace') }}</p>
+
+            <div class="flex">
+                <button type="submit" class="btn submit" name="mode" value="replace">{{ 'Replace & resave selected'|t('find-replace') }}</button>
+                <button type="submit" class="btn" name="mode" value="resave">{{ 'Resave selected only'|t('find-replace') }}</button>
+            </div>
+        </form>
+
+        {% js %}
+            (() => {
+                const form = document.getElementById('find-resave-form');
+                const all = document.getElementById('find-resave-all');
+                const boxes = () => form.querySelectorAll('input[name="targets[]"]');
+
+                all.addEventListener('change', () => boxes().forEach((box) => { box.checked = all.checked; }));
+
+                form.addEventListener('submit', (event) => {
+                    const count = [...boxes()].filter((box) => box.checked).length;
+                    const mode = event.submitter ? event.submitter.value : 'replace';
+                    const replace = form.querySelector('[name="replace"]').value;
+                    const message = mode === 'replace'
+                        ? {{ 'Replace “{find}” with “{replace}” in {count} element(s)?'|t('find-replace', { find: find, replace: '{replace}', count: '{count}' })|json_encode|raw }}
+                            .replace('{replace}', replace).replace('{count}', count)
+                        : {{ 'Resave {count} element(s) without replacing?'|t('find-replace', { count: '{count}' })|json_encode|raw }}
+                            .replace('{count}', count);
+
+                    if (!confirm(message)) {
+                        event.preventDefault();
+                    }
+                });
+            })();
+        {% endjs %}
+    {% endif %}
+{% endif %}
