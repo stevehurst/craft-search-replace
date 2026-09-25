@@ -19,20 +19,20 @@
  * @since 1.0.0
  */
 
-namespace foundbrand\findreplace\jobs;
+namespace foundbrand\searchreplace\jobs;
 
 use Craft;
 use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\i18n\Translation;
 use craft\queue\BaseJob;
-use foundbrand\findreplace\Plugin;
-use foundbrand\findreplace\services\Finder;
+use foundbrand\searchreplace\Plugin;
+use foundbrand\searchreplace\services\Finder;
 use Throwable;
 
 class ReplaceJob extends BaseJob
 {
-    public const SUMMARY_CACHE_KEY = 'find-replace:last-run';
+    public const SUMMARY_CACHE_KEY = 'search-replace:last-run';
 
     /**
      * @var string The text to find
@@ -64,7 +64,7 @@ class ReplaceJob extends BaseJob
         $failed = [];
 
         foreach (array_values($this->targets) as $i => $target) {
-            $this->setProgress($queue, $i / max($total, 1), Translation::prep('find-replace', 'Saving {step} of {total}', [
+            $this->setProgress($queue, $i / max($total, 1), Translation::prep('search-replace', 'Saving {step} of {total}', [
                 'step' => $i + 1,
                 'total' => $total,
             ]));
@@ -160,12 +160,12 @@ class ReplaceJob extends BaseJob
     protected function defaultDescription(): ?string
     {
         if ($this->replace === null) {
-            return Translation::prep('find-replace', 'Resaving elements containing “{find}”', [
+            return Translation::prep('search-replace', 'Resaving elements containing “{find}”', [
                 'find' => $this->find,
             ]);
         }
 
-        return Translation::prep('find-replace', 'Replacing “{find}” with “{replace}”', [
+        return Translation::prep('search-replace', 'Replacing “{find}” with “{replace}”', [
             'find' => $this->find,
             'replace' => $this->replace,
         ]);

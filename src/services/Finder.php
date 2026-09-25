@@ -17,7 +17,7 @@
  * @since 1.0.0
  */
 
-namespace foundbrand\findreplace\services;
+namespace foundbrand\searchreplace\services;
 
 use Craft;
 use craft\base\ElementInterface;
@@ -145,7 +145,7 @@ class Finder extends Component
     public function fieldOptions(): array
     {
         $options = [
-            ['label' => Craft::t('find-replace', 'All fields'), 'value' => ''],
+            ['label' => Craft::t('search-replace', 'All fields'), 'value' => ''],
             ['label' => Craft::t('app', 'Title'), 'value' => self::TITLE_KEY, 'data' => ['hint' => 'title']],
         ];
 
@@ -345,7 +345,7 @@ class Finder extends Component
 
             $fields[] = [
                 'key' => (string)$uid,
-                'name' => $field?->name ?? Craft::t('find-replace', 'Unknown field (not in this element’s layout)'),
+                'name' => $field?->name ?? Craft::t('search-replace', 'Unknown field (not in this element’s layout)'),
                 'handle' => $field?->handle,
                 'snippets' => $this->snippets($value, $needle),
             ];

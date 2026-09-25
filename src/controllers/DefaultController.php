@@ -14,14 +14,14 @@
  * @since 1.0.0
  */
 
-namespace foundbrand\findreplace\controllers;
+namespace foundbrand\searchreplace\controllers;
 
 use Craft;
 use craft\helpers\Queue;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
-use foundbrand\findreplace\jobs\ReplaceJob;
-use foundbrand\findreplace\Plugin;
+use foundbrand\searchreplace\jobs\ReplaceJob;
+use foundbrand\searchreplace\Plugin;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
 
@@ -35,7 +35,7 @@ class DefaultController extends Controller
             return false;
         }
 
-        $this->requirePermission('accessPlugin-find-replace');
+        $this->requirePermission('accessPlugin-search-replace');
 
         return true;
     }
@@ -53,7 +53,7 @@ class DefaultController extends Controller
             $scope = null;
         }
 
-        return $this->renderTemplate('find-replace/_index.twig', [
+        return $this->renderTemplate('search-replace/_index.twig', [
             'find' => $find,
             'replace' => $replace,
             'includeDrafts' => $includeDrafts,
@@ -93,7 +93,7 @@ class DefaultController extends Controller
             fn($target) => is_string($target) && preg_match('/^\d+:\d+$/', $target),
         ));
 
-        $returnUrl = UrlHelper::cpUrl('find-replace', array_filter([
+        $returnUrl = UrlHelper::cpUrl('search-replace', array_filter([
             'find' => $find,
             'field' => $scope,
             'replace' => $replace,
@@ -101,7 +101,7 @@ class DefaultController extends Controller
         ], fn($value) => $value !== null && $value !== ''));
 
         if (empty($targets)) {
-            $this->setFailFlash(Craft::t('find-replace', 'Select at least one element.'));
+            $this->setFailFlash(Craft::t('search-replace', 'Select at least one element.'));
             return $this->redirect($returnUrl);
         }
 
@@ -112,9 +112,9 @@ class DefaultController extends Controller
             'targets' => $targets,
         ]));
 
-        $this->setSuccessFlash(Craft::t('find-replace', '{count, plural, =1{1 element} other{# elements}} queued for {action}.', [
+        $this->setSuccessFlash(Craft::t('search-replace', '{count, plural, =1{1 element} other{# elements}} queued for {action}.', [
             'count' => count($targets),
-            'action' => $replace === null ? Craft::t('find-replace', 'resaving') : Craft::t('find-replace', 'replacing'),
+            'action' => $replace === null ? Craft::t('search-replace', 'resaving') : Craft::t('search-replace', 'replacing'),
         ]));
 
         return $this->redirect($returnUrl);

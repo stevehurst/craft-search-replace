@@ -24,7 +24,7 @@ The plugin isn't on Packagist or the Plugin Store, so add the GitHub repository 
 "repositories": [
   {
     "type": "vcs",
-    "url": "https://github.com/stevehurst/craft-find-replace"
+    "url": "https://github.com/stevehurst/craft-search-replace"
   }
 ]
 ```
@@ -32,8 +32,8 @@ The plugin isn't on Packagist or the Plugin Store, so add the GitHub repository 
 Then install it:
 
 ```bash
-composer require foundbrand/craft-find-replace
-php craft plugin/install find-replace
+composer require foundbrand/craft-search-replace
+php craft plugin/install search-replace
 ```
 
 With DDEV, prefix both commands with `ddev`, as in `ddev composer …` and `ddev craft …`.
@@ -44,7 +44,7 @@ To work on the plugin from a local checkout, use a `path` repository instead:
 
 ```json
 "repositories": [
-  { "type": "path", "url": "../craft-plugins/find-replace" }
+  { "type": "path", "url": "../craft-plugins/search-replace" }
 ]
 ```
 

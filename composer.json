@@ -1,5 +1,5 @@
 {
-  "name": "foundbrand/craft-find-replace",
+  "name": "foundbrand/craft-search-replace",
   "description": "Find text in any field across all elements, then replace it and resave through Craft.",
   "type": "craft-plugin",
   "license": "MIT",
@@ -16,16 +16,16 @@
   },
   "autoload": {
     "psr-4": {
-      "foundbrand\\findreplace\\": "src/"
+      "foundbrand\\searchreplace\\": "src/"
     }
   },
   "extra": {
     "name": "Search and Replace",
-    "handle": "find-replace",
+    "handle": "search-replace",
     "developer": "Found Brand Agency",
     "developerUrl": "https://foundbrand.agency",
-    "documentationUrl": "https://github.com/stevehurst/craft-find-replace/blob/main/README.md",
-    "class": "foundbrand\\findreplace\\Plugin"
+    "documentationUrl": "https://github.com/stevehurst/craft-search-replace/blob/main/README.md",
+    "class": "foundbrand\\searchreplace\\Plugin"
   },
   "config": {
     "allow-plugins": {

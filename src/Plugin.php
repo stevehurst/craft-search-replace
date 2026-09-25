@@ -17,13 +17,13 @@
  * @since 1.0.0
  */
 
-namespace foundbrand\findreplace;
+namespace foundbrand\searchreplace;
 
 use Craft;
 use craft\base\Plugin as BasePlugin;
 use craft\events\RegisterUrlRulesEvent;
 use craft\web\UrlManager;
-use foundbrand\findreplace\services\Finder;
+use foundbrand\searchreplace\services\Finder;
 use yii\base\Event;
 
 /**
@@ -31,7 +31,7 @@ use yii\base\Event;
  */
 class Plugin extends BasePlugin
 {
-    public const LOG_CATEGORY = 'find-replace';
+    public const LOG_CATEGORY = 'search-replace';
 
     public string $schemaVersion = '1.0.0';
 
@@ -50,13 +50,13 @@ class Plugin extends BasePlugin
     {
         parent::init();
 
-        Craft::setAlias('@foundbrand/findreplace', __DIR__);
+        Craft::setAlias('@foundbrand/searchreplace', __DIR__);
 
         Event::on(
             UrlManager::class,
             UrlManager::EVENT_REGISTER_CP_URL_RULES,
             function (RegisterUrlRulesEvent $event) {
-                $event->rules['find-replace'] = 'find-replace/default/index';
+                $event->rules['search-replace'] = 'search-replace/default/index';
             }
         );
     }
@@ -66,7 +66,7 @@ class Plugin extends BasePlugin
         $item = parent::getCpNavItem();
 
         if ($item !== null) {
-            $item['label'] = Craft::t('find-replace', 'Search and Replace');
+            $item['label'] = Craft::t('search-replace', 'Search and Replace');
         }
 
         return $item;

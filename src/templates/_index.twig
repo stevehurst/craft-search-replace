@@ -9,8 +9,8 @@
 {% extends '_layouts/cp' %}
 {% import '_includes/forms' as forms %}
 
-{% set title = 'Search and Replace'|t('find-replace') %}
-{% set pageUrl = cpUrl('find-replace') %}
+{% set title = 'Search and Replace'|t('search-replace') %}
+{% set pageUrl = cpUrl('search-replace') %}
 
 {% block content %}
 
@@ -18,13 +18,13 @@
 {% if lastRun %}
     <div class="readable" style="margin-bottom: 24px;">
         <p class="light">
-            {{ 'Last run {date}:'|t('find-replace', { date: lastRun.date|datetime('short') }) }}
+            {{ 'Last run {date}:'|t('search-replace', { date: lastRun.date|datetime('short') }) }}
             {% if lastRun.replace is null %}
-                {{ 'resaved elements containing “{find}”.'|t('find-replace', { find: lastRun.find }) }}
+                {{ 'resaved elements containing “{find}”.'|t('search-replace', { find: lastRun.find }) }}
             {% else %}
-                {{ 'replaced “{find}” with “{replace}”.'|t('find-replace', { find: lastRun.find, replace: lastRun.replace }) }}
+                {{ 'replaced “{find}” with “{replace}”.'|t('search-replace', { find: lastRun.find, replace: lastRun.replace }) }}
             {% endif %}
-            {{ '{saved} saved, {unchanged} unchanged, {failed} failed.'|t('find-replace', {
+            {{ '{saved} saved, {unchanged} unchanged, {failed} failed.'|t('search-replace', {
                 saved: lastRun.saved,
                 unchanged: lastRun.unchanged,
                 failed: lastRun.failedCount,
@@ -44,8 +44,8 @@
 {# Search #}
 <form method="get" action="{{ pageUrl }}" accept-charset="UTF-8">
     {{ forms.textField({
-        label: 'Find'|t('find-replace'),
-        instructions: 'Searches titles and every field’s stored content, on all element types and sites. Matching is exact and case-sensitive. Relation fields (Entries, Assets, etc.) can’t be searched.'|t('find-replace'),
+        label: 'Find'|t('search-replace'),
+        instructions: 'Searches titles and every field’s stored content, on all element types and sites. Matching is exact and case-sensitive. Relation fields (Entries, Assets, etc.) can’t be searched.'|t('search-replace'),
         id: 'find',
         name: 'find',
         value: find,
@@ -54,8 +54,8 @@
     }) }}
 
     {{ forms.selectizeField({
-        label: 'Field'|t('find-replace'),
-        instructions: 'Search everything, or pick one field. Type a field’s name or handle, including handles overridden in a field layout.'|t('find-replace'),
+        label: 'Field'|t('search-replace'),
+        instructions: 'Search everything, or pick one field. Type a field’s name or handle, including handles overridden in a field layout.'|t('search-replace'),
         id: 'field',
         name: 'field',
         options: fieldOptions,
@@ -63,37 +63,37 @@
     }) }}
 
     {{ forms.lightswitchField({
-        label: 'Include drafts'|t('find-replace'),
+        label: 'Include drafts'|t('search-replace'),
         id: 'drafts',
         name: 'drafts',
         on: includeDrafts,
     }) }}
 
-    <button type="submit" class="btn">{{ 'Search'|t('find-replace') }}</button>
+    <button type="submit" class="btn">{{ 'Search'|t('search-replace') }}</button>
 </form>
 
 {# Results #}
 {% if search is not null %}
     {% set scopeOption = scope ? fieldOptions|filter(o => o.value == scope)|first : null %}
-    {% set scopeLabel = scopeOption ? ' ' ~ 'in {field}'|t('find-replace', { field: scopeOption.label }) : '' %}
+    {% set scopeLabel = scopeOption ? ' ' ~ 'in {field}'|t('search-replace', { field: scopeOption.label }) : '' %}
     <hr>
 
     {% if search.results is empty %}
-        <p>{{ 'No elements contain “{find}”{inField}.'|t('find-replace', { find: find, inField: scopeLabel }) }}</p>
+        <p>{{ 'No elements contain “{find}”{inField}.'|t('search-replace', { find: find, inField: scopeLabel }) }}</p>
     {% else %}
         <p>
-            {{ '{count, plural, =1{1 element contains} other{# elements contain}} “{find}”{inField}.'|t('find-replace', {
+            {{ '{count, plural, =1{1 element contains} other{# elements contain}} “{find}”{inField}.'|t('search-replace', {
                 count: search.results|length,
                 find: find,
                 inField: scopeLabel,
             }) }}
             {% if search.truncated %}
-                <strong>{{ 'Only the first {limit} are shown. Run the replace, then search again for the rest.'|t('find-replace', { limit: limit }) }}</strong>
+                <strong>{{ 'Only the first {limit} are shown. Run the replace, then search again for the rest.'|t('search-replace', { limit: limit }) }}</strong>
             {% endif %}
         </p>
 
         <form id="search-replace-form" method="post" accept-charset="UTF-8">
-            {{ actionInput('find-replace/default/run') }}
+            {{ actionInput('search-replace/default/run') }}
             {{ csrfInput() }}
             {{ hiddenInput('find', find) }}
             {% if scope %}{{ hiddenInput('field', scope) }}{% endif %}
@@ -104,11 +104,11 @@
                     <thead>
                         <tr>
                             <th class="checkbox-cell" scope="col">
-                                <input type="checkbox" id="search-replace-all" class="checkbox" checked aria-label="{{ 'Select all'|t('find-replace') }}">
+                                <input type="checkbox" id="search-replace-all" class="checkbox" checked aria-label="{{ 'Select all'|t('search-replace') }}">
                                 <label for="search-replace-all"></label>
                             </th>
-                            <th scope="col">{{ 'Element'|t('find-replace') }}</th>
-                            <th scope="col">{{ 'Matches'|t('find-replace') }}</th>
+                            <th scope="col">{{ 'Element'|t('search-replace') }}</th>
+                            <th scope="col">{{ 'Matches'|t('search-replace') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -127,7 +127,7 @@
                                     {% endif %}
                                     <div class="light smalltext">
                                         {{ result.typeName }}
-                                        {%- if result.ownerLabel %} · {{ 'in {owner}'|t('find-replace', { owner: result.ownerLabel }) }}{% endif %}
+                                        {%- if result.ownerLabel %} · {{ 'in {owner}'|t('search-replace', { owner: result.ownerLabel }) }}{% endif %}
                                         {%- if result.isDraft %} · {{ 'Draft'|t('app') }}{% endif %}
                                         {%- if craft.app.isMultiSite %} · {{ result.site }}{% endif %}
                                         · #{{ result.id }}
@@ -151,18 +151,18 @@
             </div>
 
             {{ forms.textField({
-                label: 'Replace with'|t('find-replace'),
-                instructions: 'Leave blank to remove the text. Replacing saves each selected element and creates an entry revision you can revert.'|t('find-replace'),
+                label: 'Replace with'|t('search-replace'),
+                instructions: 'Leave blank to remove the text. Replacing saves each selected element and creates an entry revision you can revert.'|t('search-replace'),
                 id: 'replace',
                 name: 'replace',
                 value: replace,
             }) }}
 
-            <p class="warning with-icon">{{ 'Back up your database before replacing. Each element is saved through Craft, and the changes run in the queue.'|t('find-replace') }}</p>
+            <p class="warning with-icon">{{ 'Back up your database before replacing. Each element is saved through Craft, and the changes run in the queue.'|t('search-replace') }}</p>
 
             <div class="flex">
-                <button type="submit" class="btn submit" name="mode" value="replace">{{ 'Replace & resave selected'|t('find-replace') }}</button>
-                <button type="submit" class="btn" name="mode" value="resave">{{ 'Resave selected only'|t('find-replace') }}</button>
+                <button type="submit" class="btn submit" name="mode" value="replace">{{ 'Replace & resave selected'|t('search-replace') }}</button>
+                <button type="submit" class="btn" name="mode" value="resave">{{ 'Resave selected only'|t('search-replace') }}</button>
             </div>
         </form>
 
@@ -179,9 +179,9 @@
                     const mode = event.submitter ? event.submitter.value : 'replace';
                     const replace = form.querySelector('[name="replace"]').value;
                     const message = mode === 'replace'
-                        ? {{ 'Replace “{find}” with “{replace}” in {count} element(s)?'|t('find-replace', { find: find, replace: '{replace}', count: '{count}' })|json_encode|raw }}
+                        ? {{ 'Replace “{find}” with “{replace}” in {count} element(s)?'|t('search-replace', { find: find, replace: '{replace}', count: '{count}' })|json_encode|raw }}
                             .replace('{replace}', replace).replace('{count}', count)
-                        : {{ 'Resave {count} element(s) without replacing?'|t('find-replace', { count: '{count}' })|json_encode|raw }}
+                        : {{ 'Resave {count} element(s) without replacing?'|t('search-replace', { count: '{count}' })|json_encode|raw }}
                             .replace('{count}', count);
 
                     if (!confirm(message)) {
