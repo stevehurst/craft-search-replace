@@ -4,12 +4,15 @@
  * Plugin.php
  * --------------------
  *
- * Find & Resave plugin for Craft CMS 5.
+ * Search and Replace plugin for Craft CMS 5.
  *
- * Registers the Find & Resave utility, which searches every element's stored
- * field content, then replaces text and resaves the matching elements
- * through Craft's element service (revisions, search indexes and cache
- * invalidation all keep working).
+ * Adds a Search and Replace section to the control panel navigation, which
+ * searches every element's stored field content, then replaces text and
+ * resaves the matching elements through Craft's element service (revisions,
+ * search indexes and cache invalidation all keep working).
+ *
+ * Access is controlled by Craft's "Access Search and Replace" plugin
+ * permission; admins always have access.
  *
  * @since 1.0.0
  */
@@ -18,10 +21,9 @@ namespace foundbrand\findreplace;
 
 use Craft;
 use craft\base\Plugin as BasePlugin;
-use craft\events\RegisterComponentTypesEvent;
-use craft\services\Utilities;
+use craft\events\RegisterUrlRulesEvent;
+use craft\web\UrlManager;
 use foundbrand\findreplace\services\Finder;
-use foundbrand\findreplace\utilities\FindResave;
 use yii\base\Event;
 
 /**
@@ -32,6 +34,8 @@ class Plugin extends BasePlugin
     public const LOG_CATEGORY = 'find-replace';
 
     public string $schemaVersion = '1.0.0';
+
+    public bool $hasCpSection = true;
 
     public static function config(): array
     {
@@ -49,12 +53,23 @@ class Plugin extends BasePlugin
         Craft::setAlias('@foundbrand/findreplace', __DIR__);
 
         Event::on(
-            Utilities::class,
-            Utilities::EVENT_REGISTER_UTILITIES,
-            function (RegisterComponentTypesEvent $event) {
-                $event->types[] = FindResave::class;
+            UrlManager::class,
+            UrlManager::EVENT_REGISTER_CP_URL_RULES,
+            function (RegisterUrlRulesEvent $event) {
+                $event->rules['find-replace'] = 'find-replace/default/index';
             }
         );
+    }
+
+    public function getCpNavItem(): ?array
+    {
+        $item = parent::getCpNavItem();
+
+        if ($item !== null) {
+            $item['label'] = Craft::t('find-replace', 'Search and Replace');
+        }
+
+        return $item;
     }
 
     public function getFinder(): Finder

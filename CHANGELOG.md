@@ -1,4 +1,10 @@
-# Release Notes for Find & Resave
+# Release Notes for Search and Replace
+
+## 1.1.0 - 2026-09-25
+
+- Renamed the plugin to Search and Replace.
+- Moved it from Utilities to its own section in the control panel's main navigation.
+- Access is now controlled by the "Access Search and Replace" permission, which replaces the "Utilities → Find & Resave" permission.
 
 ## 1.0.0 - 2026-09-25
 

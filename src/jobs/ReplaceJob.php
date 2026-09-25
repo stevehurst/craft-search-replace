@@ -14,7 +14,7 @@
  * the search was run. Replacements create entry revisions (with revision
  * notes); plain resaves don't.
  *
- * A summary of the last run is cached and shown on the utility page.
+ * A summary of the last run is cached and shown on the Search and Replace page.
  *
  * @since 1.0.0
  */
@@ -83,7 +83,7 @@ class ReplaceJob extends BaseJob
                     continue;
                 }
 
-                $element->setRevisionNotes(sprintf('Find & Resave: replaced “%s” with “%s”', $this->find, $this->replace));
+                $element->setRevisionNotes(sprintf('Search and Replace: replaced “%s” with “%s”', $this->find, $this->replace));
             } else {
                 $element->resaving = true;
             }

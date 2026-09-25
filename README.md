@@ -1,8 +1,8 @@
-# Find & Resave for Craft CMS
+# Search and Replace for Craft CMS
 
 Find text anywhere in your content, then replace it and resave the matching elements through Craft.
 
-Craft 5's built-in **Find and Replace** utility writes straight to the database, with no preview and no resave. This plugin adds **Utilities → Find & Resave**, which works differently:
+Craft 5's built-in **Find and Replace** utility writes straight to the database, with no preview and no resave. This plugin adds **Search and Replace** to the control panel's main navigation, and works differently:
 
 - **Searches every field:** titles and every field value stored on the element (Plain Text, CKEditor, Link, Table, Dropdown, SEO fields, and so on), on all element types and sites. Nested Matrix entries are searched as their own elements.
 - **Search one field or all of them:** a searchable field picker lets you type a field's name or handle, including handles overridden in a field layout (for example a shared "Text" field used as `eventName`). Picking a field limits both the search and the replace to every instance of it. You can also pick **Title**.
@@ -53,12 +53,12 @@ With DDEV, the path must be available inside the container. Mount it with a `doc
 ## Usage
 
 1. Back up your database.
-2. Go to **Utilities → Find & Resave**, enter the text, choose **All fields** or pick a field, and search. Turn on **Include drafts** if needed. Revisions and trashed elements are never included.
+2. Click **Search and Replace** in the control panel navigation, enter the text, choose **All fields** or pick a field, and search. Turn on **Include drafts** if needed. Revisions and trashed elements are never included.
 3. Review the matches, and untick any elements you want to leave alone.
 4. Enter the replacement text and click **Replace & resave selected**. To save the elements without changing them, click **Resave selected only**.
-5. The work runs in the queue. When it finishes, the utility shows how many elements were saved, unchanged or failed, and why each failure happened.
+5. The work runs in the queue. When it finishes, the page shows how many elements were saved, unchanged or failed, and why each failure happened.
 
-Access is controlled by the **Utilities → Find & Resave** user permission. Admins always have access.
+Access is controlled by the **Access Search and Replace** user permission (under **General**). Admins always have access, and the navigation item only shows for users who have it.
 
 ## How it works
 

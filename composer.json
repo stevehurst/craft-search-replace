@@ -20,7 +20,7 @@
     }
   },
   "extra": {
-    "name": "Find & Resave",
+    "name": "Search and Replace",
     "handle": "find-replace",
     "developer": "Found Brand Agency",
     "developerUrl": "https://foundbrand.agency",

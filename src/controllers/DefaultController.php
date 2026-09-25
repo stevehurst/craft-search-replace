@@ -4,8 +4,12 @@
  * DefaultController.php
  * --------------------
  *
- * Handles the Find & Resave utility's replace/resave form: validates the
- * request and pushes a ReplaceJob onto the queue for the selected elements.
+ * Search and Replace control panel section.
+ *
+ * - index: the search page. Searching is a GET request
+ *   (`?find=…&field=…&drafts=1`), so a search can be bookmarked or reloaded.
+ * - run: validates the replace/resave form and pushes a ReplaceJob onto the
+ *   queue for the selected elements.
  *
  * @since 1.0.0
  */
@@ -18,21 +22,47 @@ use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use foundbrand\findreplace\jobs\ReplaceJob;
 use foundbrand\findreplace\Plugin;
-use foundbrand\findreplace\utilities\FindResave;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
 
 class DefaultController extends Controller
 {
+    public const RESULT_LIMIT = 500;
+
     public function beforeAction($action): bool
     {
         if (!parent::beforeAction($action)) {
             return false;
         }
 
-        $this->requirePermission('utility:' . FindResave::id());
+        $this->requirePermission('accessPlugin-find-replace');
 
         return true;
+    }
+
+    public function actionIndex(): Response
+    {
+        $request = Craft::$app->getRequest();
+        $find = (string)$request->getQueryParam('find', '');
+        $replace = (string)$request->getQueryParam('replace', '');
+        $includeDrafts = (bool)$request->getQueryParam('drafts');
+        $finder = Plugin::getInstance()->getFinder();
+
+        $scope = (string)$request->getQueryParam('field', '') ?: null;
+        if (!$finder->isValidScope($scope)) {
+            $scope = null;
+        }
+
+        return $this->renderTemplate('find-replace/_index.twig', [
+            'find' => $find,
+            'replace' => $replace,
+            'includeDrafts' => $includeDrafts,
+            'scope' => $scope,
+            'fieldOptions' => $finder->fieldOptions(),
+            'search' => $find !== '' ? $finder->find($find, $includeDrafts, self::RESULT_LIMIT, $scope) : null,
+            'limit' => self::RESULT_LIMIT,
+            'lastRun' => Craft::$app->getCache()->get(ReplaceJob::SUMMARY_CACHE_KEY) ?: null,
+        ]);
     }
 
     public function actionRun(): Response
@@ -63,7 +93,7 @@ class DefaultController extends Controller
             fn($target) => is_string($target) && preg_match('/^\d+:\d+$/', $target),
         ));
 
-        $returnUrl = UrlHelper::cpUrl('utilities/' . FindResave::id(), array_filter([
+        $returnUrl = UrlHelper::cpUrl('find-replace', array_filter([
             'find' => $find,
             'field' => $scope,
             'replace' => $replace,

@@ -1,14 +1,18 @@
 {#
- # _utility.twig
+ # _index.twig
  # --------------------
  #
- # Find & Resave utility page: the search form, the results table with
- # per-element checkboxes, and the replace/resave actions.
+ # Search and Replace control panel section: the search form, the results
+ # table with per-element checkboxes, and the replace/resave actions.
  #}
 
+{% extends '_layouts/cp' %}
 {% import '_includes/forms' as forms %}
 
-{% set utilityUrl = cpUrl('utilities/' ~ utilityId) %}
+{% set title = 'Search and Replace'|t('find-replace') %}
+{% set pageUrl = cpUrl('find-replace') %}
+
+{% block content %}
 
 {# Last run summary #}
 {% if lastRun %}
@@ -38,7 +42,7 @@
 {% endif %}
 
 {# Search #}
-<form method="get" action="{{ utilityUrl }}" accept-charset="UTF-8">
+<form method="get" action="{{ pageUrl }}" accept-charset="UTF-8">
     {{ forms.textField({
         label: 'Find'|t('find-replace'),
         instructions: 'Searches titles and every field’s stored content, on all element types and sites. Matching is exact and case-sensitive. Relation fields (Entries, Assets, etc.) can’t be searched.'|t('find-replace'),
@@ -88,7 +92,7 @@
             {% endif %}
         </p>
 
-        <form id="find-resave-form" method="post" accept-charset="UTF-8">
+        <form id="search-replace-form" method="post" accept-charset="UTF-8">
             {{ actionInput('find-replace/default/run') }}
             {{ csrfInput() }}
             {{ hiddenInput('find', find) }}
@@ -100,8 +104,8 @@
                     <thead>
                         <tr>
                             <th class="checkbox-cell" scope="col">
-                                <input type="checkbox" id="find-resave-all" class="checkbox" checked aria-label="{{ 'Select all'|t('find-replace') }}">
-                                <label for="find-resave-all"></label>
+                                <input type="checkbox" id="search-replace-all" class="checkbox" checked aria-label="{{ 'Select all'|t('find-replace') }}">
+                                <label for="search-replace-all"></label>
                             </th>
                             <th scope="col">{{ 'Element'|t('find-replace') }}</th>
                             <th scope="col">{{ 'Matches'|t('find-replace') }}</th>
@@ -109,7 +113,7 @@
                     </thead>
                     <tbody>
                         {% for result in search.results %}
-                            {% set checkboxId = 'find-resave-' ~ result.key|replace(':', '-') %}
+                            {% set checkboxId = 'search-replace-' ~ result.key|replace(':', '-') %}
                             <tr>
                                 <td class="checkbox-cell">
                                     <input type="checkbox" id="{{ checkboxId }}" class="checkbox" name="targets[]" value="{{ result.key }}" checked>
@@ -164,8 +168,8 @@
 
         {% js %}
             (() => {
-                const form = document.getElementById('find-resave-form');
-                const all = document.getElementById('find-resave-all');
+                const form = document.getElementById('search-replace-form');
+                const all = document.getElementById('search-replace-all');
                 const boxes = () => form.querySelectorAll('input[name="targets[]"]');
 
                 all.addEventListener('change', () => boxes().forEach((box) => { box.checked = all.checked; }));
@@ -188,3 +192,4 @@
         {% endjs %}
     {% endif %}
 {% endif %}
+{% endblock %}
