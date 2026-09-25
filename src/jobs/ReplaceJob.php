@@ -8,6 +8,7 @@
  * through Craft's element service, or just resaves them when no replacement
  * is given.
  *
+ * When a field scope is set, only that field (or the title) is changed.
  * Each element is re-read from the database when the job runs, so the
  * replacement is applied to its current content, not the content from when
  * the search was run. Replacements create entry revisions (with revision
@@ -42,6 +43,11 @@ class ReplaceJob extends BaseJob
      * @var string|null The replacement text, or null to resave without replacing
      */
     public ?string $replace = null;
+
+    /**
+     * @var string|null Null for all fields, Finder::TITLE_KEY for titles, or a field UID
+     */
+    public ?string $scope = null;
 
     /**
      * @var string[] Targets as "elementId:siteId"
@@ -127,13 +133,13 @@ class ReplaceJob extends BaseJob
 
         $changed = false;
 
-        if ($stored['title'] !== null && str_contains($stored['title'], $this->find)) {
+        if ($finder->titleInScope($this->scope) && $stored['title'] !== null && str_contains($stored['title'], $this->find)) {
             $element->title = str_replace($this->find, $this->replace, $stored['title']);
             $changed = true;
         }
 
         foreach ($stored['content'] as $uid => $value) {
-            if (!$finder->valueContains($value, $this->find)) {
+            if (!$finder->keyInScope((string)$uid, $this->scope) || !$finder->valueContains($value, $this->find)) {
                 continue;
             }
 

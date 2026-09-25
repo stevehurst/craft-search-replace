@@ -17,6 +17,7 @@ use craft\helpers\Queue;
 use craft\helpers\UrlHelper;
 use craft\web\Controller;
 use foundbrand\findreplace\jobs\ReplaceJob;
+use foundbrand\findreplace\Plugin;
 use foundbrand\findreplace\utilities\FindResave;
 use yii\web\BadRequestHttpException;
 use yii\web\Response;
@@ -43,6 +44,7 @@ class DefaultController extends Controller
         $mode = $request->getRequiredBodyParam('mode');
         $replace = $mode === 'replace' ? (string)$request->getBodyParam('replace', '') : null;
         $includeDrafts = (bool)$request->getBodyParam('drafts');
+        $scope = (string)$request->getBodyParam('field', '') ?: null;
 
         if ($find === '') {
             throw new BadRequestHttpException('Find text is required.');
@@ -52,6 +54,10 @@ class DefaultController extends Controller
             throw new BadRequestHttpException('Invalid mode.');
         }
 
+        if (!Plugin::getInstance()->getFinder()->isValidScope($scope)) {
+            throw new BadRequestHttpException('Invalid field.');
+        }
+
         $targets = array_values(array_filter(
             (array)$request->getBodyParam('targets', []),
             fn($target) => is_string($target) && preg_match('/^\d+:\d+$/', $target),
@@ -59,6 +65,7 @@ class DefaultController extends Controller
 
         $returnUrl = UrlHelper::cpUrl('utilities/' . FindResave::id(), array_filter([
             'find' => $find,
+            'field' => $scope,
             'replace' => $replace,
             'drafts' => $includeDrafts ? 1 : null,
         ], fn($value) => $value !== null && $value !== ''));
@@ -71,6 +78,7 @@ class DefaultController extends Controller
         Queue::push(new ReplaceJob([
             'find' => $find,
             'replace' => $replace,
+            'scope' => $scope,
             'targets' => $targets,
         ]));
 

@@ -5,6 +5,7 @@ Find text anywhere in your content, then replace it and resave the matching elem
 Craft 5's built-in **Find and Replace** utility writes straight to the database, with no preview and no resave. This plugin adds **Utilities → Find & Resave**, which works differently:
 
 - **Searches every field:** titles and every field value stored on the element (Plain Text, CKEditor, Link, Table, Dropdown, SEO fields, and so on), on all element types and sites. Nested Matrix entries are searched as their own elements.
+- **Search one field or all of them:** a searchable field picker lets you type a field's name or handle, including handles overridden in a field layout (for example a shared "Text" field used as `eventName`). Picking a field limits both the search and the replace to every instance of it. You can also pick **Title**.
 - **Shows matches first:** each result has the element, its owner for nested entries, the matching fields and a highlighted snippet, with a link to edit it.
 - **Lets you choose:** tick which elements to change.
 - **Resaves properly:** every change goes through Craft's element service, so entry revisions (with notes), search indexes, cache invalidation and plugin events all work as normal.
@@ -52,7 +53,7 @@ With DDEV, the path must be available inside the container. Mount it with a `doc
 ## Usage
 
 1. Back up your database.
-2. Go to **Utilities → Find & Resave** and search. Turn on **Include drafts** if needed. Revisions and trashed elements are never included.
+2. Go to **Utilities → Find & Resave**, enter the text, choose **All fields** or pick a field, and search. Turn on **Include drafts** if needed. Revisions and trashed elements are never included.
 3. Review the matches, and untick any elements you want to leave alone.
 4. Enter the replacement text and click **Replace & resave selected**. To save the elements without changing them, click **Resave selected only**.
 5. The work runs in the queue. When it finishes, the utility shows how many elements were saved, unchanged or failed, and why each failure happened.
@@ -61,10 +62,11 @@ Access is controlled by the **Utilities → Find & Resave** user permission. Adm
 
 ## How it works
 
-- **Search:** it looks in `elements_sites.title` and `elements_sites.content`, the JSON column where Craft 5 stores each element's field values. Matching is exact and case-sensitive.
+- **Search:** it looks in `elements_sites.title` and `elements_sites.content`, the JSON column where Craft 5 stores each element's field values, keyed by field layout element UID. Matching is exact and case-sensitive.
+- **Field scope:** picking a field finds its instance UIDs in every field layout. The search then only checks those keys (with `JSON_EXTRACT` on MySQL, or `->` on PostgreSQL), and the replace only changes them.
 - **Replace:** it re-reads each element's stored values when the job runs, replaces the text in every value that contains it (recursing into structured values like Link or Table data), sets the values back on the element and saves it.
 - **Validation:** saves use the `essentials` validation scenario, the same as `craft resave/*`, so unrelated required-field rules don't block a content fix.
-- **Revisions:** a replace creates a revision for entries with revisions enabled. **Resave only** doesn't, because it marks the element as resaving.
+- **Revisions:** a replace creates a revision for entries with revisions enabled. **Resave only** doesn't, because it marks the element as resaving. Nested Matrix entries don't keep revisions of their own (Craft keeps revisions on the owner), and saving one on its own doesn't create a revision for its owner.
 
 ## Limitations
 

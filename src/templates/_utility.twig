@@ -49,6 +49,15 @@
         autofocus: find is empty,
     }) }}
 
+    {{ forms.selectizeField({
+        label: 'Field'|t('find-replace'),
+        instructions: 'Search everything, or pick one field. Type a field’s name or handle, including handles overridden in a field layout.'|t('find-replace'),
+        id: 'field',
+        name: 'field',
+        options: fieldOptions,
+        value: scope ?? '',
+    }) }}
+
     {{ forms.lightswitchField({
         label: 'Include drafts'|t('find-replace'),
         id: 'drafts',
@@ -61,15 +70,18 @@
 
 {# Results #}
 {% if search is not null %}
+    {% set scopeOption = scope ? fieldOptions|filter(o => o.value == scope)|first : null %}
+    {% set scopeLabel = scopeOption ? ' ' ~ 'in {field}'|t('find-replace', { field: scopeOption.label }) : '' %}
     <hr>
 
     {% if search.results is empty %}
-        <p>{{ 'No elements contain “{find}”.'|t('find-replace', { find: find }) }}</p>
+        <p>{{ 'No elements contain “{find}”{inField}.'|t('find-replace', { find: find, inField: scopeLabel }) }}</p>
     {% else %}
         <p>
-            {{ '{count, plural, =1{1 element contains} other{# elements contain}} “{find}”.'|t('find-replace', {
+            {{ '{count, plural, =1{1 element contains} other{# elements contain}} “{find}”{inField}.'|t('find-replace', {
                 count: search.results|length,
                 find: find,
+                inField: scopeLabel,
             }) }}
             {% if search.truncated %}
                 <strong>{{ 'Only the first {limit} are shown. Run the replace, then search again for the rest.'|t('find-replace', { limit: limit }) }}</strong>
@@ -80,6 +92,7 @@
             {{ actionInput('find-replace/default/run') }}
             {{ csrfInput() }}
             {{ hiddenInput('find', find) }}
+            {% if scope %}{{ hiddenInput('field', scope) }}{% endif %}
             {% if includeDrafts %}{{ hiddenInput('drafts', 1) }}{% endif %}
 
             <div class="tablepane" style="margin-bottom: 24px;">

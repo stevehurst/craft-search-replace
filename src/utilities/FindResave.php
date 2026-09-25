@@ -6,7 +6,7 @@
  *
  * The Find & Resave control panel utility (Utilities → Find & Resave).
  *
- * Searching is a GET request on the utility page (`?find=…&drafts=1`), so a
+ * Searching is a GET request on the utility page (`?find=…&field=…&drafts=1`), so a
  * search can be bookmarked or reloaded. The results form posts to
  * `find-replace/default/run`, which queues the replace or resave.
  *
@@ -48,9 +48,15 @@ class FindResave extends Utility
         $find = (string)$request->getQueryParam('find', '');
         $replace = (string)$request->getQueryParam('replace', '');
         $includeDrafts = (bool)$request->getQueryParam('drafts');
+        $finder = Plugin::getInstance()->getFinder();
+
+        $scope = (string)$request->getQueryParam('field', '') ?: null;
+        if (!$finder->isValidScope($scope)) {
+            $scope = null;
+        }
 
         $search = $find !== ''
-            ? Plugin::getInstance()->getFinder()->find($find, $includeDrafts, self::RESULT_LIMIT)
+            ? $finder->find($find, $includeDrafts, self::RESULT_LIMIT, $scope)
             : null;
 
         return Craft::$app->getView()->renderTemplate('find-replace/_utility.twig', [
@@ -58,6 +64,8 @@ class FindResave extends Utility
             'find' => $find,
             'replace' => $replace,
             'includeDrafts' => $includeDrafts,
+            'scope' => $scope,
+            'fieldOptions' => $finder->fieldOptions(),
             'search' => $search,
             'limit' => self::RESULT_LIMIT,
             'lastRun' => Craft::$app->getCache()->get(ReplaceJob::SUMMARY_CACHE_KEY) ?: null,
